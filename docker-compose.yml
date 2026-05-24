@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Наш бэкенд на FastAPI
+  web:
+    build: .
+    ports:
+      - "8080:8000" # На ПК лаба откроется по порту 8080, а внутри контейнера она на 8000
+    environment:
+      - DB_HOST=db
+      - DB_NAME=bspu_db
+      - DB_USER=postgres
+      - DB_PASSWORD=supersecurepwd
+    depends_on:
+      - db
+    networks:
+      - bspu-network
+
+  # Официальный образ базы данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=bspu_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=supersecurepwd
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Volume для сохранения данных БД
+    networks:
+      - bspu-network
+
+# Объявляем ресурсы, используемые сервисами
+volumes:
+  postgres_data: # Данные не удалятся, даже если контейнер полностью уничтожить
+
+networks:
+  bspu-network: # Изолированная сеть для безопасного общения web и db
+    driver: bridge
